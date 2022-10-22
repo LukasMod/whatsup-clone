@@ -1,17 +1,22 @@
-import { Text, Image, StyleSheet, Pressable, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { Text, Image, StyleSheet, Pressable, View } from "react-native"
+import { useNavigation } from "@react-navigation/native"
 
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import dayjs from "dayjs"
+import relativeTime from "dayjs/plugin/relativeTime"
 
-dayjs.extend(relativeTime);
+dayjs.extend(relativeTime)
 
 const ContactListItem = ({ user }) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation()
+
+  //FIXME:
+  const imageFix = user.image.includes("http")
+    ? user.image
+    : "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/lukas.jpeg"
 
   return (
     <Pressable onPress={() => {}} style={styles.container}>
-      <Image source={{ uri: user.image }} style={styles.image} />
+      <Image source={{ uri: imageFix }} style={styles.image} />
 
       <View style={styles.content}>
         <Text style={styles.name} numberOfLines={1}>
@@ -23,16 +28,19 @@ const ContactListItem = ({ user }) => {
         </Text>
       </View>
     </Pressable>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginHorizontal: 10,
     marginVertical: 5,
     height: 70,
-    alignItems: 'center',
+    alignItems: "center",
+  },
+  content: {
+    flex: 1,
   },
   image: {
     width: 60,
@@ -41,11 +49,12 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   name: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   subTitle: {
-    color: 'gray',
+    color: "gray",
   },
-});
+})
 
-export default ContactListItem;
+export default ContactListItem
+
