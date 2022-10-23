@@ -1,24 +1,31 @@
-import { useEffect } from 'react';
-import { ImageBackground, StyleSheet, FlatList, KeyboardAvoidingView } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import Message from '../components/Message';
-import InputBox from '../components/InputBox';
+import { useEffect } from "react"
+import {
+  ImageBackground,
+  StyleSheet,
+  FlatList,
+  KeyboardAvoidingView,
+} from "react-native"
+import { useRoute, useNavigation } from "@react-navigation/native"
+import Message from "../components/Message"
+import InputBox from "../components/InputBox"
 
-import bg from '../../assets/images/BG.png';
-import messages from '../../assets/data/messages.json';
+import bg from "../../assets/images/BG.png"
+import messages from "../../assets/data/messages.json"
 
 const ChatScreen = () => {
-  const route = useRoute();
-  const navigation = useNavigation();
+  const route = useRoute()
+  const navigation = useNavigation()
+
+  const chatroomID = route?.params?.id
 
   useEffect(() => {
-    navigation.setOptions({ title: route.params.name });
-  }, [route.params.name]);
+    navigation.setOptions({ title: route.params.name })
+  }, [route.params.name])
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 90}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 90}
       style={styles.bg}
     >
       <ImageBackground source={bg} style={styles.bg}>
@@ -28,11 +35,11 @@ const ChatScreen = () => {
           style={styles.list}
           inverted
         />
-        <InputBox />
+        <InputBox chatroomID={chatroomID} />
       </ImageBackground>
     </KeyboardAvoidingView>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   bg: {
@@ -41,6 +48,7 @@ const styles = StyleSheet.create({
   list: {
     padding: 10,
   },
-});
+})
 
-export default ChatScreen;
+export default ChatScreen
+
