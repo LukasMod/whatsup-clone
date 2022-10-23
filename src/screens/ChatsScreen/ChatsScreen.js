@@ -15,7 +15,13 @@ const ChatsScreen = () => {
       const response = await API.graphql(
         graphqlOperation(listChatRooms, { id: authUser.attributes.sub })
       )
-      setChatRooms(response.data.getUser.ChatRooms.items)
+
+
+      setChatRooms(
+        response.data.getUser.ChatRooms.items.filter(
+          (item) => !item.chatRoom._deleted
+        )
+      )
     }
 
     fetchChatRooms()

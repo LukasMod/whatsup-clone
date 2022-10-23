@@ -21,7 +21,7 @@ const ContactListItem = ({ user }) => {
 
     const existingChatRoom = await getCommonChatRoomWithUser(user.id)
     if (existingChatRoom) {
-      navigation.navigate("Chat", { id: existingChatRoom.id })
+      navigation.navigate("Chat", { id: existingChatRoom.chatRoom.id })
       return
     }
 

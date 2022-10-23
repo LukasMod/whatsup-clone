@@ -21,6 +21,8 @@ const ChatListItem = ({ chat, authUserId }) => {
     ? user?.image
     : "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/lukas.jpeg"
 
+  console.log("TEST ", chat)
+
   return (
     <Pressable
       onPress={() =>
@@ -36,12 +38,12 @@ const ChatListItem = ({ chat, authUserId }) => {
             {user?.name}
           </Text>
           <Text style={styles.subTitle}>
-            {dayjs(chat.lastMessage?.createdAt).fromNow(true)}
+            {dayjs(chat.LastMessage?.createdAt).fromNow(true)}
           </Text>
         </View>
 
         <Text numberOfLines={2} style={styles.subTitle}>
-          {chat.lastMessage?.text}
+          {chat.LastMessage?.text}
         </Text>
       </View>
     </Pressable>

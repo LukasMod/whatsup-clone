@@ -8,7 +8,10 @@ export const getCommonChatRoomWithUser = async (userID) => {
     graphqlOperation(listChatRooms, { id: authUser.attributes.sub })
   )
 
-  const chatRooms = response.data?.getUser?.ChatRooms?.items || []
+  const chatRooms =
+    response.data?.getUser?.ChatRooms?.items.filter(
+      (item) => !item.chatRoom._deleted
+    ) || []
 
   const chatRoom = chatRooms.find((item) =>
     item.chatRoom.users.items.some((userItem) => userItem.user.id === userID)
@@ -27,6 +30,7 @@ export const listChatRooms = /* GraphQL */ `
         items {
           chatRoom {
             id
+            _deleted
             users {
               items {
                 user {
