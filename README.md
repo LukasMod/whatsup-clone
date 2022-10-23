@@ -17,7 +17,7 @@ If you are a beginner that wants to learn javascript and React Native, or an adv
 | Part | Topic   | Video url                                                 | Starting Branch | Result Branch                                                        |
 | ---- | ------- | --------------------------------------------------------- | --------------- | -------------------------------------------------------------------- |
 | #1   | UI      | [Watch on YT](http://www.youtube.com/watch?v=mxXJSVW4tRY) | -               | [View branch](https://github.com/notJust-dev/whatsapp/tree/Part1-UI) |
-| #2   | Backend | Coming Soon                                               | -               | -                                                                    |
+| #2   | Backend | [Watch on YT](http://www.youtube.com/watch?v=8psijC5ezkc)                                               | -               | -                                                                    |
 
 ## Run the project
 
