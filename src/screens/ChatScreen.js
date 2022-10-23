@@ -32,7 +32,6 @@ const ChatScreen = () => {
     )
   }, [])
 
-  console.log("TEST ", chatRoom)
 
   useEffect(() => {
     navigation.setOptions({ title: route.params.name })

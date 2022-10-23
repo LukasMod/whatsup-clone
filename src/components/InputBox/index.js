@@ -27,8 +27,6 @@ const InputBox = ({ chatRoom }) => {
 
     // set the new message as the lastMessage of the chatRoom
 
-    console.log("TEST newMessageData", newMessageData, chatRoom)
-
     await API.graphql(
       graphqlOperation(updateChatRoom, {
         input: {
