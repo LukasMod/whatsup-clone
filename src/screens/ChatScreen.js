@@ -14,24 +14,37 @@ import bg from "../../assets/images/BG.png"
 import messages from "../../assets/data/messages.json"
 
 import { API, graphqlOperation } from "aws-amplify"
-import { getChatRoom } from "../graphql/queries"
+import { getChatRoom, listMessagesByChatRoom } from "../graphql/queries"
 
 const ChatScreen = () => {
   const route = useRoute()
   const navigation = useNavigation()
 
   const [chatRoom, setChatRoom] = useState(null)
+  const [messages, setMessages] = useState([])
 
   const chatroomID = route?.params?.id
 
+  //fetch chat room
   useEffect(() => {
     API.graphql(graphqlOperation(getChatRoom, { id: chatroomID })).then(
       (result) => {
         setChatRoom(result.data?.getChatRoom)
       }
     )
-  }, [])
+  }, [chatroomID])
 
+  //fetch chat messages
+  useEffect(() => {
+    API.graphql(
+      graphqlOperation(listMessagesByChatRoom, {
+        chatroomID,
+        sortDirection: "DESC",
+      })
+    ).then((result) => {
+      setMessages(result.data?.listMessagesByChatRoom?.items)
+    })
+  }, [chatroomID])
 
   useEffect(() => {
     navigation.setOptions({ title: route.params.name })
@@ -49,7 +62,7 @@ const ChatScreen = () => {
     >
       <ImageBackground source={bg} style={styles.bg}>
         <FlatList
-          data={chatRoom.Messages.items}
+          data={messages}
           renderItem={({ item }) => <Message message={item} />}
           style={styles.list}
           inverted
