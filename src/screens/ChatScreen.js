@@ -15,6 +15,7 @@ import messages from "../../assets/data/messages.json"
 
 import { API, graphqlOperation } from "aws-amplify"
 import { getChatRoom, listMessagesByChatRoom } from "../graphql/queries"
+import { onCreateMessage } from "../graphql/subscriptions"
 
 const ChatScreen = () => {
   const route = useRoute()
@@ -44,6 +45,23 @@ const ChatScreen = () => {
     ).then((result) => {
       setMessages(result.data?.listMessagesByChatRoom?.items)
     })
+
+    // subscribe to new messages
+
+    const subscription = API.graphql(
+      graphqlOperation(onCreateMessage, {
+        filter: { chatroomID: { eq: chatroomID } },
+      })
+    ).subscribe({
+      next: ({ value }) => {
+        setMessages((m) => [value.data.onCreateMessage, ...m])
+      },
+      error: (err) => {
+        console.log(err)
+      },
+    })
+
+    return () => subscription.unsubscribe()
   }, [chatroomID])
 
   useEffect(() => {
