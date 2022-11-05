@@ -13,8 +13,14 @@ export const getCommonChatRoomWithUser = async (userID) => {
       (item) => !item.chatRoom._deleted
     ) || []
 
-  const chatRoom = chatRooms.find((item) =>
-    item.chatRoom.users.items.some((userItem) => userItem.user.id === userID)
+  // const chatRoom = chatRooms.find((item) =>
+  //   item.chatRoom.users.items.some((userItem) => userItem.user.id === userID)
+  // )
+
+  const chatRoom = chatRooms.find(
+    (item) =>
+      item.chatRoom.users.items.length === 2 &&
+      item.chatRoom.users.items.some((userItem) => userItem.user.id === userID)
   )
 
   //TODO: remove chat rooms with more than 2 users

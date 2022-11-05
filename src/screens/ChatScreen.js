@@ -84,6 +84,8 @@ const ChatScreen = () => {
     return <ActivityIndicator style={styles.loader} />
   }
 
+  console.log('TEST ',JSON.stringify(chatRoom.users.items[3]) )
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
