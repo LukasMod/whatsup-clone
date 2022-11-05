@@ -19,11 +19,11 @@ const ChatsScreen = () => {
     )
 
     const rooms =
-      response.data.getUser.ChatRooms.items.filter(
-        (item) => !item.chatRoom._deleted
+      response.data?.getUser?.ChatRooms?.items?.filter(
+        (item) => !item.chatRoom._deleted && !item._deleted
       ) || []
 
-    const sortedRooms = rooms.sort(
+    const sortedRooms = rooms?.sort(
       (room1, room2) =>
         new Date(room2.chatRoom.updatedAt) - new Date(room1.chatRoom.updatedAt)
     )
