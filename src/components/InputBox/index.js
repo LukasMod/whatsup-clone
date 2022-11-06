@@ -2,21 +2,33 @@ import { useState } from "react"
 import { View, StyleSheet, TextInput, Image } from "react-native"
 import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
-import { API, Auth, graphqlOperation } from "aws-amplify"
+import { API, Auth, graphqlOperation, Storage } from "aws-amplify"
 import { createMessage, updateChatRoom } from "../../graphql/mutations"
 import * as ImagePicker from "expo-image-picker"
+
+import "react-native-get-random-values"
+import { v4 as uuidv4 } from "uuid"
 
 const InputBox = ({ chatRoom }) => {
   const [text, setText] = useState("")
   const [image, setImage] = useState(null)
 
   const onSend = async () => {
+    if (!text || (!text && !image)) {
+      return
+    }
+
     const authUser = await Auth.currentAuthenticatedUser()
 
     const newMessage = {
       chatroomID: chatRoom.id,
       text,
       userID: authUser.attributes.sub,
+    }
+
+    if (image) {
+      newMessage.images = [await uploadFile(image)]
+      setImage(null)
     }
 
     const newMessageData = await API.graphql(
@@ -51,6 +63,20 @@ const InputBox = ({ chatRoom }) => {
 
     if (!result.cancelled) {
       setImage(result.uri)
+    }
+  }
+
+  const uploadFile = async (fileUri) => {
+    try {
+      const response = await fetch(fileUri)
+      const blob = await response.blob()
+      const key = `${uuidv4()}.png`
+      await Storage.put(key, blob, {
+        contentType: "image/png", // contentType is optional
+      })
+      return key
+    } catch (err) {
+      console.log("Error uploading file:", err)
     }
   }
 

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
-import { View, Text, StyleSheet } from "react-native"
+import { View, Text, StyleSheet, Image } from "react-native"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Auth } from "aws-amplify"
+import { S3Image } from "aws-amplify-react-native"
+
 dayjs.extend(relativeTime)
 
 const Message = ({ message }) => {
@@ -28,6 +30,12 @@ const Message = ({ message }) => {
         },
       ]}
     >
+      {message.images?.length && (
+        <View style={styles.imageContainer}>
+          <S3Image imgKey={message.images[0]} style={styles.image} />
+        </View>
+      )}
+
       <Text>{message.text}</Text>
       <Text style={styles.time}>{dayjs(message.createdAt).fromNow(true)}</Text>
     </View>
@@ -55,6 +63,18 @@ const styles = StyleSheet.create({
   time: {
     color: "gray",
     alignSelf: "flex-end",
+  },
+  imageContainer: {
+    width: 200,
+    height: 100,
+    borderWidth: 2,
+    borderRadius: 5,
+    borderColor: "white",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
   },
 })
 
