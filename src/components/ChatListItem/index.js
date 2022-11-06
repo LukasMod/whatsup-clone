@@ -30,7 +30,13 @@ const ChatListItem = ({ chat, authUserId }) => {
       graphqlOperation(onUpdateChatRoom, { filter: { id: { eq: chat.id } } })
     ).subscribe({
       next: ({ value }) => {
-        setChatRoom((cr) => ({ ...(cr || {}), ...value.data.onUpdateChatRoom }))
+        setChatRoom((cr) => {
+          return {
+            ...(cr || {}), // old data
+            ...value.data.onUpdateChatRoom, // new data
+            users: { items: chat.users.items }, // to fix missing users data (name, image) after subscription
+          }
+        })
       },
       error: (err) => {
         console.log(err)

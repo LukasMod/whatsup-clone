@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react"
-import { View, Text, StyleSheet, Image, Pressable } from "react-native"
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+  useWindowDimensions,
+} from "react-native"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Auth, Storage } from "aws-amplify"
@@ -11,6 +18,7 @@ const Message = ({ message }) => {
   const [isMe, setIsMe] = useState(false)
   const [imageSources, setImageSources] = useState([])
   const [imageViewerVisible, setImageViewerVisible] = useState(false)
+  const { width } = useWindowDimensions()
 
   useEffect(() => {
     const isMyMessage = async () => {
@@ -32,6 +40,8 @@ const Message = ({ message }) => {
     downloadImages()
   }, [message.images])
 
+  const imageContainerWidth = width * 0.8 - 30
+
   return (
     <View
       style={[
@@ -42,11 +52,22 @@ const Message = ({ message }) => {
         },
       ]}
     >
-      {message.images?.length && (
-        <View style={styles.imageContainer}>
-          <Pressable onPress={() => setImageViewerVisible(true)}>
-            <Image source={imageSources[0]} style={styles.image} />
-          </Pressable>
+      {!!imageSources.length && (
+        <View style={[{ width: imageContainerWidth }, styles.images]}>
+          {imageSources.map((imageSource) => {
+            return (
+              <Pressable
+                onPress={() => setImageViewerVisible(true)}
+                key={imageSource.uri}
+                style={[
+                  styles.imageContainer,
+                  imageSources.length === 1 && styles.imageContainerSingle,
+                ]}
+              >
+                <Image source={imageSource} style={styles.image} />
+              </Pressable>
+            )
+          })}
           <ImageView
             images={imageSources}
             imageIndex={0}
@@ -84,17 +105,24 @@ const styles = StyleSheet.create({
     color: "gray",
     alignSelf: "flex-end",
   },
+  images: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
   imageContainer: {
-    width: 200,
-    height: 100,
-    borderWidth: 2,
-    borderRadius: 5,
+    width: "45%",
     borderColor: "white",
+    margin: 2,
+    borderRadius: 5,
+    borderWidth: 2,
+    aspectRatio: 1,
+  },
+  imageContainerSingle: {
+    flex: 1,
   },
   image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
+    flex: 1,
+    borderRadius: 5,
   },
 })
 

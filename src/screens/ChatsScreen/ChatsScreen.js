@@ -36,6 +36,8 @@ const ChatsScreen = () => {
     fetchChatRooms()
   }, [])
 
+
+
   return (
     <FlatList
       data={chatRooms}

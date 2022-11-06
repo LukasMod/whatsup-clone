@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { View, StyleSheet, TextInput, Image } from "react-native"
+import { View, StyleSheet, TextInput, Image, FlatList } from "react-native"
 import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { API, Auth, graphqlOperation, Storage } from "aws-amplify"
@@ -11,45 +11,43 @@ import { v4 as uuidv4 } from "uuid"
 
 const InputBox = ({ chatRoom }) => {
   const [text, setText] = useState("")
-  const [image, setImage] = useState(null)
+  const [images, setImages] = useState([])
 
   const onSend = async () => {
-    if (!text || (!text && !image)) {
-      return
+    if (text || images.length) {
+      const authUser = await Auth.currentAuthenticatedUser()
+
+      const newMessage = {
+        chatroomID: chatRoom.id,
+        text,
+        userID: authUser.attributes.sub,
+      }
+
+      if (images.length) {
+        newMessage.images = await Promise.all(images.map(uploadFile))
+        setImages([])
+      }
+
+      const newMessageData = await API.graphql(
+        graphqlOperation(createMessage, {
+          input: newMessage,
+        })
+      )
+
+      setText("")
+
+      // set the new message as the lastMessage of the chatRoom
+
+      await API.graphql(
+        graphqlOperation(updateChatRoom, {
+          input: {
+            _version: chatRoom._version,
+            chatRoomLastMessageId: newMessageData.data.createMessage.id,
+            id: chatRoom.id,
+          },
+        })
+      )
     }
-
-    const authUser = await Auth.currentAuthenticatedUser()
-
-    const newMessage = {
-      chatroomID: chatRoom.id,
-      text,
-      userID: authUser.attributes.sub,
-    }
-
-    if (image) {
-      newMessage.images = [await uploadFile(image)]
-      setImage(null)
-    }
-
-    const newMessageData = await API.graphql(
-      graphqlOperation(createMessage, {
-        input: newMessage,
-      })
-    )
-
-    setText("")
-
-    // set the new message as the lastMessage of the chatRoom
-
-    await API.graphql(
-      graphqlOperation(updateChatRoom, {
-        input: {
-          _version: chatRoom._version,
-          chatRoomLastMessageId: newMessageData.data.createMessage.id,
-          id: chatRoom.id,
-        },
-      })
-    )
   }
 
   const pickImage = async () => {
@@ -57,12 +55,16 @@ const InputBox = ({ chatRoom }) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
+      allowsMultipleSelection: true,
     })
 
-    console.log(result)
-
     if (!result.cancelled) {
-      setImage(result.uri)
+      if (result.selected) {
+        //user selected multiple files
+        setImages(result.selected.map((asset) => asset.uri))
+      } else {
+        setImages([result.uri])
+      }
     }
   }
 
@@ -82,19 +84,34 @@ const InputBox = ({ chatRoom }) => {
 
   return (
     <>
-      {image && (
+      {!!images.length && (
         <View style={styles.attachmentsContainer}>
-          <Image
-            source={{ uri: image }}
-            style={styles.selectedImage}
-            resizeMode="contain"
-          />
-          <MaterialIcons
-            name="highlight-remove"
-            onPress={() => setImage(null)}
-            size={20}
-            color="gray"
-            style={styles.removeSelectedImage}
+          <FlatList
+            data={images}
+            horizontal
+            renderItem={({ item }) => {
+              return (
+                <>
+                  <Image
+                    source={{ uri: item }}
+                    style={styles.selectedImage}
+                    resizeMode="contain"
+                    horizontal
+                  />
+                  <MaterialIcons
+                    name="highlight-remove"
+                    onPress={() =>
+                      setImages((existingImages) =>
+                        existingImages.filter((img) => img !== item)
+                      )
+                    }
+                    size={20}
+                    color="gray"
+                    style={styles.removeSelectedImage}
+                  />
+                </>
+              )
+            }}
           />
         </View>
       )}
@@ -158,7 +175,7 @@ const styles = StyleSheet.create({
   },
   selectedImage: {
     height: 100,
-    width: 200,
+    width: 180,
     margin: 5,
   },
   removeSelectedImage: {
