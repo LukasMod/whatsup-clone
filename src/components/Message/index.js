@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react"
-import { View, Text, StyleSheet, Image } from "react-native"
+import { View, Text, StyleSheet, Image, Pressable } from "react-native"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
-import { Auth } from "aws-amplify"
-import { S3Image } from "aws-amplify-react-native"
+import { Auth, Storage } from "aws-amplify"
+import ImageView from "react-native-image-viewing"
 
 dayjs.extend(relativeTime)
 
 const Message = ({ message }) => {
   const [isMe, setIsMe] = useState(false)
+  const [imageSources, setImageSources] = useState([])
+  const [imageViewerVisible, setImageViewerVisible] = useState(false)
 
   useEffect(() => {
     const isMyMessage = async () => {
@@ -18,7 +20,17 @@ const Message = ({ message }) => {
     }
 
     isMyMessage()
-  })
+  }, [])
+
+  useEffect(() => {
+    const downloadImages = async () => {
+      if (message.images?.length) {
+        const imageUrls = await Promise.all(message.images.map(Storage.get))
+        setImageSources(imageUrls.map((uri) => ({ uri })))
+      }
+    }
+    downloadImages()
+  }, [message.images])
 
   return (
     <View
@@ -32,7 +44,15 @@ const Message = ({ message }) => {
     >
       {message.images?.length && (
         <View style={styles.imageContainer}>
-          <S3Image imgKey={message.images[0]} style={styles.image} />
+          <Pressable onPress={() => setImageViewerVisible(true)}>
+            <Image source={imageSources[0]} style={styles.image} />
+          </Pressable>
+          <ImageView
+            images={imageSources}
+            imageIndex={0}
+            visible={imageViewerVisible}
+            onRequestClose={() => setImageViewerVisible(false)}
+          />
         </View>
       )}
 
