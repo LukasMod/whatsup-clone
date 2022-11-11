@@ -59,16 +59,20 @@ const InputBox = ({ chatRoom }) => {
   }
 
   const addAttachment = async (file, messageID) => {
+    const types = {
+      image: "IMAGE",
+      video: "VIDEO",
+    }
+
     const newAttachment = {
       storageKey: await uploadFile(file.uri),
-      type: "IMAGE", // TODO: videos
+      type: types[file.type], 
       width: file.width,
       height: file.height,
       duration: file.duration,
       messageID,
       chatroomID: chatRoom.id,
     }
-
 
     return API.graphql(
       graphqlOperation(createAttachment, { input: newAttachment })
@@ -78,7 +82,7 @@ const InputBox = ({ chatRoom }) => {
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       quality: 1,
       allowsMultipleSelection: true,
     })

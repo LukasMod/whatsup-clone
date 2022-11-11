@@ -10,13 +10,14 @@ import {
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { Auth, Storage } from "aws-amplify"
-import ImageView from "react-native-image-viewing"
+
+import ImageAttachments from "./ImageAttachments"
+import VideoAttachments from "./VideoAttachments"
 
 dayjs.extend(relativeTime)
 
 const Message = ({ message }) => {
   const [isMe, setIsMe] = useState(false)
-  const [imageViewerVisible, setImageViewerVisible] = useState(false)
   const [downloadedAttachments, setDownloadedAttachments] = useState([])
 
   const { width } = useWindowDimensions()
@@ -51,6 +52,12 @@ const Message = ({ message }) => {
   }, [message.Attachments.items])
 
   const imageContainerWidth = width * 0.8 - 30
+  const imageAttachments = downloadedAttachments.filter(
+    (at) => at.type === "IMAGE"
+  )
+  const videoAttachments = downloadedAttachments.filter(
+    (at) => at.type === "VIDEO"
+  )
 
   return (
     <View
@@ -64,25 +71,10 @@ const Message = ({ message }) => {
     >
       {!!downloadedAttachments.length && (
         <View style={[{ width: imageContainerWidth }, styles.images]}>
-          {downloadedAttachments.map((attachment) => {
-            return (
-              <Pressable
-                onPress={() => setImageViewerVisible(true)}
-                key={attachment.id}
-                style={[
-                  styles.imageContainer,
-                  downloadedAttachments.length === 1 && styles.imageContainerSingle,
-                ]}
-              >
-                <Image source={{ uri: attachment.uri }} style={styles.image} />
-              </Pressable>
-            )
-          })}
-          <ImageView
-            images={downloadedAttachments.map(({ uri }) => ({ uri }))}
-            imageIndex={0}
-            visible={imageViewerVisible}
-            onRequestClose={() => setImageViewerVisible(false)}
+          <ImageAttachments attachments={imageAttachments} />
+          <VideoAttachments
+            attachments={videoAttachments}
+            width={imageContainerWidth}
           />
         </View>
       )}
