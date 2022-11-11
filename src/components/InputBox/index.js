@@ -1,5 +1,12 @@
 import { useState } from "react"
-import { View, StyleSheet, TextInput, Image, FlatList } from "react-native"
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Image,
+  FlatList,
+  Text,
+} from "react-native"
 import { AntDesign, MaterialIcons } from "@expo/vector-icons"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { API, Auth, graphqlOperation, Storage } from "aws-amplify"
@@ -16,6 +23,7 @@ import { v4 as uuidv4 } from "uuid"
 const InputBox = ({ chatRoom }) => {
   const [text, setText] = useState("")
   const [files, setFiles] = useState([])
+  const [progresses, setProgresses] = useState({})
 
   const onSend = async () => {
     if (text || files.length) {
@@ -66,7 +74,7 @@ const InputBox = ({ chatRoom }) => {
 
     const newAttachment = {
       storageKey: await uploadFile(file.uri),
-      type: types[file.type], 
+      type: types[file.type],
       width: file.width,
       height: file.height,
       duration: file.duration,
@@ -104,6 +112,12 @@ const InputBox = ({ chatRoom }) => {
       const key = `${uuidv4()}.png`
       await Storage.put(key, blob, {
         contentType: "image/png", // contentType is optional
+        progressCallback: (progress) => {
+          setProgresses((p) => ({
+            ...p,
+            [fileUri]: progress.loaded / progress.total,
+          }))
+        },
       })
       return key
     } catch (err) {
@@ -127,6 +141,15 @@ const InputBox = ({ chatRoom }) => {
                     resizeMode="contain"
                     horizontal
                   />
+
+                  {progresses[item.uri] && (
+                    <View style={styles.progress}>
+                      <Text style={styles.progresText}>
+                        {(progresses[item.uri] * 100).toFixed(0)} %
+                      </Text>
+                    </View>
+                  )}
+
                   <MaterialIcons
                     name="highlight-remove"
                     onPress={() =>
@@ -213,6 +236,21 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     overflow: "hidden",
+  },
+  progress: {
+    position: "absolute",
+    // top: "50%",
+    // left: "50%",
+    backgroundColor: "rgba(22,22,22,0.2)",
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  progresText: {
+    color: "white",
+    fontSize: 18,
   },
 })
 

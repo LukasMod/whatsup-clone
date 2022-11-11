@@ -39,7 +39,7 @@ const ChatListItem = ({ chat, authUserId }) => {
         })
       },
       error: (err) => {
-        console.log(err)
+        console.log('subscription onUpdateChatRoom', err)
       },
     })
 

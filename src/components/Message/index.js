@@ -6,6 +6,7 @@ import {
   Image,
   Pressable,
   useWindowDimensions,
+  ActivityIndicator,
 } from "react-native"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
@@ -49,7 +50,7 @@ const Message = ({ message }) => {
     }
 
     downloadAttachments()
-  }, [message.Attachments.items])
+  }, [JSON.stringify(message.Attachments.items)])
 
   const imageContainerWidth = width * 0.8 - 30
   const imageAttachments = downloadedAttachments.filter(
@@ -58,6 +59,28 @@ const Message = ({ message }) => {
   const videoAttachments = downloadedAttachments.filter(
     (at) => at.type === "VIDEO"
   )
+
+  const renderAttachments = () => {
+    if (!!downloadedAttachments.length) {
+      return (
+        <View style={[{ width: imageContainerWidth }, styles.images]}>
+          <ImageAttachments attachments={imageAttachments} />
+          <VideoAttachments
+            attachments={videoAttachments}
+            width={imageContainerWidth}
+          />
+        </View>
+      )
+    }
+
+    if (!downloadedAttachments.length && !!message.Attachments.items.length) {
+      return (
+        <View style={styles.placeholder}>
+          <ActivityIndicator />
+        </View>
+      )
+    }
+  }
 
   return (
     <View
@@ -69,16 +92,7 @@ const Message = ({ message }) => {
         },
       ]}
     >
-      {!!downloadedAttachments.length && (
-        <View style={[{ width: imageContainerWidth }, styles.images]}>
-          <ImageAttachments attachments={imageAttachments} />
-          <VideoAttachments
-            attachments={videoAttachments}
-            width={imageContainerWidth}
-          />
-        </View>
-      )}
-
+      {renderAttachments()}
       <Text>{message.text}</Text>
       <Text style={styles.time}>{dayjs(message.createdAt).fromNow(true)}</Text>
     </View>
@@ -125,6 +139,13 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     borderRadius: 5,
+  },
+  placeholder: {
+    width: "100%",
+    backgroundColor: "rgba(22,22,22,0.2)",
+    aspectRatio: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 })
 
